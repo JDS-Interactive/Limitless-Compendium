@@ -34,9 +34,7 @@ Limitless Compendium is an installable, offline-capable spatial memory PWA. It u
 
 ### Desktop
 
-- Move mouse: look around
-- Hold left mouse: move forward in the direction the camera faces
-- Hold right mouse: move backward
+- Hold left or right mouse and move around: look around
 - Mouse wheel up/down: move forward/backward
 - Space or middle click: place memory orb
 - First click orb: select
