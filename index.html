@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Limitless Compendium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050816" />
+  <meta name="description" content="An offline spatial memory palace built with Three.js and OPFS." />
+  <link rel="icon" href="icons/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="app">
+    <section id="splashScreen" class="splash-screen" aria-label="Limitless Compendium splash screen">
+      <video id="splashVideo" class="splash-video" src="./videos/splash.mp4" playsinline muted loop preload="auto"></video>
+
+      <div class="splash-content">
+        <!-- <img src="./icons/LimitlessCompendium.png" alt="Limitless Compendium" class="splash-emblem" /> -->
+
+        <div class="splash-actions">
+          <button id="enterAppBtn" type="button">Enter</button>
+          <button id="playSplashAudioBtn" type="button" class="ghost-button">Play Audio</button>
+        </div>
+
+        <p id="splashStatus" class="small-note">Video starts muted. Tap Play Audio to hear the splash.</p>
+      </div>
+    </section>
+
+    <canvas id="scene"></canvas>
+
+    <section id="hud" aria-label="Limitless Compendium HUD">
+      <div class="brand">
+        <div class="sigil">∞</div>
+        <div>
+          <h1>Limitless Compendium</h1>
+          <p>Spatial memory training</p>
+        </div>
+      </div>
+
+      <div class="status-pill" id="storageStatus">Loading vault…</div>
+
+      <div class="hud-actions">
+        <button id="vaultBtn" class="ghost-button" type="button">Vault</button>
+        <button id="helpBtn" class="ghost-button" type="button">Controls</button>
+      </div>
+    </section>
+
+    <section id="crosshair" aria-hidden="true">+</section>
+
+    <section id="desktopHints" class="hint-strip">
+      <span>Mouse: look</span>
+      <span>Left hold / wheel up: forward</span>
+      <span>Right hold / wheel down: backward</span>
+      <span>Space / middle click: place orb</span>
+    </section>
+
+    <section id="mobileControls" aria-label="Mobile flight controls">
+      <div class="stick-zone" id="moveStickZone">
+        <div class="stick-label">Move</div>
+        <div class="stick-base"><div class="stick-knob" id="moveKnob"></div></div>
+      </div>
+      <div class="stick-zone" id="lookStickZone">
+        <div class="stick-label">Look</div>
+        <div class="stick-base"><div class="stick-knob" id="lookKnob"></div></div>
+      </div>
+      <button id="mobilePlaceBtn" type="button">Place Orb</button>
+    </section>
+
+    <aside id="memoryEditor" class="panel hidden" aria-label="Memory editor">
+      <header>
+        <h2>Create Memory Orb</h2>
+        <button class="icon-button" id="closeEditorBtn" type="button" aria-label="Close">×</button>
+      </header>
+
+      <label>
+        Title
+        <input id="memoryTitle" type="text" maxlength="80" placeholder="A memory worth strengthening…" />
+      </label>
+
+      <label>
+        Memory text
+        <textarea id="memoryText" rows="6" placeholder="Write the memory here. Voice can be recorded too."></textarea>
+      </label>
+
+      <div class="record-row">
+        <button id="recordBtn" type="button">Record Voice</button>
+        <button id="stopRecordBtn" type="button" disabled>Stop</button>
+        <span id="recordStatus">No recording</span>
+      </div>
+
+      <audio id="recordPreview" controls class="hidden"></audio>
+
+      <footer>
+        <button id="cancelMemoryBtn" type="button" class="ghost-button">Cancel</button>
+        <button id="saveMemoryBtn" type="button">Save Orb</button>
+      </footer>
+    </aside>
+
+    <aside id="memoryViewer" class="panel hidden" aria-label="Memory viewer">
+      <header>
+        <div>
+          <h2 id="viewerTitle">Memory</h2>
+          <p id="viewerMeta">Visit count: 0</p>
+        </div>
+        <button class="icon-button" id="exitOrbBtn" type="button" aria-label="Exit orb">×</button>
+      </header>
+      <article id="viewerText"></article>
+      <audio id="viewerAudio" controls class="hidden"></audio>
+
+      <section class="link-section" aria-label="Linked memories">
+        <header class="subheader">
+          <h3>Linked Memories</h3>
+          <button id="toggleLinkEditorBtn" type="button" class="ghost-button mini-button">Edit Links</button>
+        </header>
+
+        <div id="linkedMemoriesList" class="linked-list">
+          <p class="small-note">No linked memories yet.</p>
+        </div>
+
+        <div id="linkEditor" class="link-editor hidden">
+          <label>
+            Add internal link
+            <select id="linkMemorySelect"></select>
+          </label>
+          <div class="inline-actions">
+            <button id="addLinkBtn" type="button">Add Link</button>
+            <button id="closeLinkEditorBtn" type="button" class="ghost-button">Done</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="small-note">Exiting the orb records a visit and strengthens this synapse.</p>
+    </aside>
+
+
+    <aside id="vaultPanel" class="panel hidden" aria-label="Vault tools">
+      <header>
+        <div>
+          <h2>Memory Vault</h2>
+          <p class="small-note">Export, import, merge, encrypt, or inspect your local vault.</p>
+        </div>
+        <button class="icon-button" id="closeVaultBtn" type="button" aria-label="Close">×</button>
+      </header>
+
+      <div class="vault-actions">
+        <button id="exportVaultBtn" type="button">Export JSON</button>
+        <button id="importVaultBtn" type="button" class="ghost-button">Import / Merge JSON</button>
+        <button id="exportEncryptedVaultBtn" type="button">Export Encrypted</button>
+        <button id="importEncryptedVaultBtn" type="button" class="ghost-button">Import Encrypted</button>
+        <button id="viewVaultBtn" type="button" class="ghost-button">View Raw JSON</button>
+      </div>
+
+      <input type="file" id="importFileInput" accept=".json,application/json" hidden />
+      <input type="file" id="importEncryptedFileInput" accept=".json,application/json" hidden />
+
+      <label class="password-row">
+        Vault password
+        <input id="vaultPassword" type="password" autocomplete="new-password" placeholder="Required for encrypted export/import" />
+      </label>
+
+      <div class="merge-option">
+        <label>
+          <input id="replaceVaultCheckbox" type="checkbox" />
+          Replace existing vault instead of merging
+        </label>
+      </div>
+
+      <p id="vaultStatus" class="small-note">Ready.</p>
+
+      <pre id="vaultContent" class="vault-content hidden"></pre>
+    </aside>
+
+    <aside id="helpPanel" class="panel hidden" aria-label="Controls">
+      <header>
+        <h2>Controls</h2>
+        <button class="icon-button" id="closeHelpBtn" type="button" aria-label="Close">×</button>
+      </header>
+
+      <div class="help-grid">
+        <div>
+          <h3>Desktop</h3>
+          <p>Hold the left or right mouse button and move the mouse to look around.</p>
+          <p>Use the mouse wheel to move forward or backward in the direction the camera is facing.</p>
+          <p>Press Space or middle-click to place a memory orb.</p>
+          <p>Click an orb once to select/change its color. Click the same orb again to enter it.</p>
+        </div>
+
+        <div>
+          <h3>Mobile</h3>
+          <p>Left thumbstick moves forward/backward and strafes left/right.</p>
+          <p>Right thumbstick looks around.</p>
+          <p>Use Place Orb to create a memory.</p>
+          <p>Tap an orb once to select it. Tap the same orb again to enter it.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+LIMITLESS COMPENDIUM LICENSE
+Copyright (c) 2026 Jared De Santis
+All rights reserved.
+
+Permission is hereby granted to any individual to view, study, and evaluate
+the source code of this software for personal, educational, or informational purposes only.
+
+RESTRICTIONS:
+
+1. NO COPYING OR REDISTRIBUTION  
+   You may not copy, reproduce, distribute, publish, sublicense, or share this software,
+   in whole or in part, in any form, without prior written permission from the author.
+
+2. NO MODIFICATION  
+   You may not modify, adapt, translate, reverse engineer, decompile, or create derivative
+   works based on this software without prior written permission from the author.
+
+3. NO COMMERCIAL USE  
+   You may not use this software, or any portion of it, for commercial purposes without
+   explicit written consent from the author.
+
+4. NO DEPLOYMENT  
+   You may not deploy, host, or make this software available as a service or application
+   (publicly or privately) without prior written permission from the author.
+
+5. ATTRIBUTION  
+   This software remains the intellectual property of Jared De Santis at all times.
+
+PERMISSION REQUESTS:
+
+For permissions beyond the scope of this license, including commercial use,
+modification, or distribution, please contact:
+
+Jared De Santis  
+Email: jedarch@icloud.com
+
+DISCLAIMER:
+
+This software is provided "as is", without warranty of any kind, express or implied,
+including but not limited to the warranties of merchantability, fitness for a particular
+purpose, and noninfringement. In no event shall the author be liable for any claim,
+damages, or other liability arising from, out of, or in connection with the software
+or the use or other dealings in the software.
+
+---
+
+"Not by force, but by virtue."
