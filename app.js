@@ -66,7 +66,10 @@ const ui = {
   moveStickZone: $("moveStickZone"),
   lookStickZone: $("lookStickZone"),
   moveKnob: $("moveKnob"),
-  lookKnob: $("lookKnob")
+  lookKnob: $("lookKnob"),
+  deleteTextBtn: $("deleteTextBtn"),
+  deleteAudioBtn: $("deleteAudioBtn"),
+  deleteMemoryBtn: $("deleteMemoryBtn"),
 };
 
 boot();
@@ -144,6 +147,10 @@ function bindUI() {
   ui.mobilePlaceBtn.addEventListener("click", () => {
     openMemoryEditor(neuralScene.getPlacementPosition());
   });
+
+  ui.deleteTextBtn.addEventListener("click", deleteCurrentMemoryText);
+  ui.deleteAudioBtn.addEventListener("click", deleteCurrentMemoryAudio);
+  ui.deleteMemoryBtn.addEventListener("click", deleteCurrentMemory);
 }
 
 function enterApplication() {
@@ -453,6 +460,65 @@ async function removeMemoryLink(sourceId, targetId) {
   vault = await store.readVault();
   neuralScene.renderMemories(vault.memories);
   renderMemoryViewer(sourceId);
+}
+
+async function deleteCurrentMemoryText() {
+  if (!activeMemoryId) return;
+
+  const confirmed = confirm("Delete the text from this memory?");
+  if (!confirmed) return;
+
+  const memory = vault.memories.find((item) => item.id === activeMemoryId);
+  if (!memory) return;
+
+  await store.updateMemory(activeMemoryId, {
+    content: "",
+    type: memory.audioDataUrl ? "audio" : "empty",
+    updatedAt: new Date().toISOString()
+  });
+
+  vault = await store.readVault();
+  renderMemoryViewer(activeMemoryId);
+  neuralScene.renderMemories(vault.memories);
+}
+
+async function deleteCurrentMemoryAudio() {
+  if (!activeMemoryId) return;
+
+  const confirmed = confirm("Delete the audio recording from this memory?");
+  if (!confirmed) return;
+
+  const memory = vault.memories.find((item) => item.id === activeMemoryId);
+  if (!memory) return;
+
+  await store.updateMemory(activeMemoryId, {
+    audioDataUrl: null,
+    type: memory.content ? "text" : "empty",
+    updatedAt: new Date().toISOString()
+  });
+
+  vault = await store.readVault();
+  renderMemoryViewer(activeMemoryId);
+  neuralScene.renderMemories(vault.memories);
+}
+
+async function deleteCurrentMemory() {
+  if (!activeMemoryId) return;
+
+  const memory = vault.memories.find((item) => item.id === activeMemoryId);
+  const title = memory?.title || "this memory";
+
+  const confirmed = confirm(`Delete "${title}" permanently? This removes its text, audio, links, and orb.`);
+  if (!confirmed) return;
+
+  await store.deleteMemory(activeMemoryId);
+
+  activeMemoryId = null;
+  ui.memoryViewer.classList.add("hidden");
+
+  vault = await store.readVault();
+  neuralScene.renderMemories(vault.memories);
+  updateStorageStatus();
 }
 
 async function travelToLinkedMemory(targetId) {

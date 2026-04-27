@@ -1,4 +1,7 @@
 const VAULT_FILE = "memories.json";
+const BASE_STRENGTH = 0.2;
+const MAX_STRENGTH = 2.5;
+const DAILY_DECAY = 0.04;
 
 const DEFAULT_VAULT = {
   version: 1,
@@ -113,7 +116,11 @@ export class MemoryStore {
       const elapsedDays = Math.floor((now - lastDecayAt) / 86_400_000);
       if (elapsedDays <= 0) continue;
 
-      memory.strength = clamp((memory.strength ?? 0.2) - elapsedDays * 0.04, 0.08, 2.5);
+      memory.strength = clamp(
+        (memory.strength ?? BASE_STRENGTH) - elapsedDays * DAILY_DECAY,
+        BASE_STRENGTH,
+        MAX_STRENGTH
+      );
       memory.decayCount = (memory.decayCount ?? 0) + elapsedDays;
       memory.lastDecayAt = new Date(lastDecayAt + elapsedDays * 86_400_000).toISOString();
       changed = true;
@@ -121,6 +128,20 @@ export class MemoryStore {
 
     if (changed) await this.writeVault(vault);
     return vault;
+  }
+
+  async deleteMemory(id) {
+    const vault = await this.readVault();
+
+    vault.memories = vault.memories.filter((memory) => memory.id !== id);
+
+    for (const memory of vault.memories) {
+      memory.links = (memory.links || []).filter((linkId) => linkId !== id);
+      memory.updatedAt = new Date().toISOString();
+    }
+
+    await this.writeVault(vault);
+    return true;
   }
 }
 
@@ -139,7 +160,7 @@ export function createMemory({ title, content, audioDataUrl, position }) {
     lastDecayAt: now,
     visitCount: 0,
     decayCount: 0,
-    strength: 0.2,
+    strength: BASE_STRENGTH,
     colorIndex: 0,
     currentlyOccupied: false,
     position,
@@ -155,7 +176,11 @@ export function strengthenMemory(memory) {
     currentlyOccupied: false,
     lastVisitedAt: new Date().toISOString(),
     lastDecayAt: new Date().toISOString(),
-    strength: clamp((memory.strength ?? 0.2) + 0.08 + Math.min(visits * 0.005, 0.08), 0.08, 2.5)
+    strength: clamp(
+      (memory.strength ?? BASE_STRENGTH) + 0.08 + Math.min(visits * 0.005, 0.08),
+      BASE_STRENGTH,
+      MAX_STRENGTH
+    )
   };
 }
 
@@ -177,7 +202,7 @@ export function normalizeVault(value) {
 
   vault.memories = vault.memories.map((memory) => ({
     ...memory,
-    strength: clamp(Number(memory.strength ?? 0.2), 0.08, 2.5),
+    strength: clamp(Number(memory.strength ?? BASE_STRENGTH), BASE_STRENGTH, MAX_STRENGTH),
     visitCount: Number(memory.visitCount ?? 0),
     decayCount: Number(memory.decayCount ?? 0),
     colorIndex: Number(memory.colorIndex ?? 0),

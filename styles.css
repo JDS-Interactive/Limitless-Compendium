@@ -611,3 +611,17 @@ audio {
     height: 170px;
   }
 }
+
+.danger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.danger-button {
+  background: linear-gradient(135deg, #ff5555, #ff79c6);
+  color: #fff;
+}
